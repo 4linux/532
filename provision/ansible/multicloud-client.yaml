@@ -1,0 +1,56 @@
+---
+- hosts: all
+  vars:
+    sudoers:
+      - ec2-user
+      - suporte-gcp
+      - azureuser
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Garantindo /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ item }}"
+      with_items:
+        - 172.16.0.200 multicloud-client
+
+    - name: Adiciona o usuario ec2-user
+      user:
+        name: ec2-user
+        shell: /bin/bash
+        password : $1$QbUARykG$p2nthVG8AkDvabKPHwboa1
+
+    - name: Adiciona o usuario suporte-gcp
+      user:
+        name: suporte-gcp
+        shell: /bin/bash
+        password : $1$QbUARykG$p2nthVG8AkDvabKPHwboa1
+
+    - name: Adiciona o usuario azureuser
+      user:
+        name: azureuser
+        shell: /bin/bash
+        password : $1$QbUARykG$p2nthVG8AkDvabKPHwboa1
+
+    - name: Adicionar usuarios ao grupo wheel
+      lineinfile:
+        path: /etc/sudoers
+        line: "{{ item }}"
+      with_items:
+        - 'ec2-user ALL=(ALL) NOPASSWD: ALL'
+        - 'suporte-gcp ALL=(ALL) NOPASSWD: ALL'
+        - 'azureuser ALL=(ALL) NOPASSWD: ALL'
+
+    - name: Configura o servidor SSH para permitir conexao por senha
+      ansible.builtin.replace:
+        path: /etc/ssh/sshd_config
+        regexp: 'PasswordAuthentication no'
+        replace: 'PasswordAuthentication yes'
+
+    - name: Reinicia o SSH
+      service:
+        name: sshd
+        daemon_reload: yes
+        state: restarted

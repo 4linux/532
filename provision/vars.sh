@@ -24,7 +24,7 @@ function InstalarPacotes {
 sudo apt update -y; wait;
 
 # Instalando pacotes essenciais para o curso
-sudo apt install -y vim unzip apache2-utils;
+sudo apt install -y apache2-utils;
 }
 
 function ConfigurarSSH {
